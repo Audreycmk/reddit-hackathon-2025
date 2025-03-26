@@ -9,51 +9,51 @@ const memes = [
   {
     question: "Rock Paper Scissors. Guess who won?",
     image: "https://i.redd.it/8csl1hc8udpe1.png", 
-    correct: "Cops beat rockstars 🚓 🎸",
+    correct: "Cops beat rockstars 🎸🚓",
     wrong: [
-      "Paper covers rock 📄 🪨",
-      "Who cares, it's a draw 🤷‍♂️",
+      "It's a draw 🤷‍♂️",
       "Neighbour wins 😏 🤌 !!! ",
-    ],
-  },
-  {
-    question: "Buddha, what makes us human?",
-    image: "https://i.redd.it/uv9mongn7qqe1.png", 
-    correct: "Selecting traffic lights",
-    wrong: [
-      "Opposable thumbs",
-      "Self-awareness",
-      "Credit card debt"
-    ],
-  },
-  {
-    question: "500kg iron vs. 500kg feathers",
-    image: "https://i.redd.it/mykhhex7vfqe1.jpeg",
-    correct: "Gym bro's ego shattered",
-    wrong: [
-      "Same weight, different volume",
-      "Feathers stuck in throat",
-      "Iron sold as NFT",
+      "Rock: I'm a rock, I don't care 🪨",
     ],
   },
   {
     question: "Heart is a heart! (Dog's butt shave)",
     image: "https://i.redd.it/xexx7e24tcqe1.jpeg",
-    correct: "Dog got OnlyFans fame",
+    correct: "Dog got OnlyFans fame 🍑💕",
     wrong: [
-      "Groomer followed instructions",
-      "It's a birthmark",
-      "Dog sued for copyright",
+      "Groomer followed instructions 🐶",
+      "He found his missing piece 👉👌",
+      "Get the dog a lawyer!!! 🧑‍⚖️",
+    ],
+  },
+  {
+    question: "Buddha, what makes us human?",
+    image: "https://i.redd.it/uv9mongn7qqe1.png", 
+    correct: "Selecting traffic lights 🧑‍💻🚦🚥",
+    wrong: [
+      "But master, they all look right 🤯",
+      "Hackers: I write scripts 🤓👨‍💻",
+      "Overthinking 🧘‍♂️",
+    ],
+  },
+  {
+    question: "500kg iron vs. 500kg feathers",
+    image: "https://i.redd.it/mykhhex7vfqe1.jpeg",
+    correct: "Bro I need that tutorial 🏋️‍♂️🙌🏻",
+    wrong: [
+      "Same weight 🤓😎",
+      "Bird: 500 kg feathers??? 💀🐦",
+      "Don't ask. I don't do gym 🤷‍♂️",
     ],
   },
   {
     question: "What screams 'I'm insecure'?",
     image: "https://i.redd.it/mm9qirb0irqe1.png",
-    correct: "Posting 'I'm not insecure'",
+    correct: "I'm old...💀🪦",
     wrong: [
-      "Oversized sunglasses",
-      "Laughing too loud",
-      "Flexing on LinkedIn"
+      "Wait, they don\’t all have that? 🤔",
+      "Neh. My password is password 😎",
+      "I'm not insecure, I'm just shy 🥺",
     ],
   }
 ];
