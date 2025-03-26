@@ -9,11 +9,11 @@ const memes = [
   {
     question: "Rock Paper Scissors. Guess who won?",
     image: "https://i.redd.it/8csl1hc8udpe1.png", 
-    correct: "Cops beat rockstars",
+    correct: "Cops beat rockstars 🚓 🎸",
     wrong: [
-      "Paper covers rock",
-      "Scissors cut paper",
-      "Tie goes to lizard",
+      "Paper covers rock 📄 🪨",
+      "Who cares, it's a draw 🤷‍♂️",
+      "Neighbour wins 😏 🤌 !!! ",
     ],
   },
   {
@@ -134,52 +134,101 @@ Devvit.addCustomPostType({
     };
 
     return (
-      <vstack height="100%" width="100%" gap="medium" alignment="center middle">
+      <vstack 
+        height="100%" 
+        width="100%" 
+        gap="medium" 
+        alignment="center middle"
+        padding="medium"
+        backgroundColor="#FFEEF2"
+      >
         {!gameStarted ? (
-          <>
-            <text size="xxlarge" weight="bold">Image Quiz Game</text>
-            <text size="medium">Identify what's shown in each image</text>
-            <button appearance="primary" onPress={startGame}>
+          <vstack gap="medium" alignment="center middle">
+            <vstack cornerRadius="full" padding="medium" backgroundColor="#FF4500">
+              <text size="xxlarge" weight="bold" color="white">
+                MEME QUIZ CHALLENGE
+              </text>
+            </vstack>
+            <image 
+              url={memes[0].image}
+              imageWidth={300}
+              imageHeight={200}
+              description="Meme preview"
+            />
+            <text size="large" weight="bold" color="#1A1A1B">
+              Can you guess these meme scenarios?
+            </text>
+            <button appearance="primary" onPress={startGame} size="small">
               Start Game
             </button>
-          </>
+          </vstack>
         ) : gameEnded ? (
-          <>
-            <text size="xxlarge" weight="bold">Game Over! 🎉</text>
-            <text size="xlarge">Your Score: {score}/{memes.length}</text>
-            <vstack gap="small">
-              <button appearance="primary" onPress={postScoreToComments}>
-                Post My Score
+          <vstack gap="medium" alignment="center middle">
+            <text size="xxlarge" weight="bold" color="#FF4500">
+              Game Over! 🎉
+            </text>
+            <text size="xlarge" weight="bold">
+              Your Score: {score}/{memes.length}
+            </text>
+            <vstack gap="medium" width="80%">
+              <button appearance="primary" onPress={postScoreToComments} size="small">
+                Flex My Score
               </button>
-              <button appearance="primary" onPress={startGame}>
+              <button appearance="primary" onPress={startGame} size="small">
                 Play Again
               </button>
             </vstack>
-          </>
+          </vstack>
         ) : (
-          <>
-            <text size="large">{memes[questionIndex].question}</text>
+          <vstack gap="medium" width="90%" alignment="center middle">
+            <text size="xlarge" weight="bold" color="#1A1A1B">
+              {memes[questionIndex].question}
+            </text>
             <image 
-              url={memes[questionIndex].image} 
-              imageWidth={300} //change img width
-              imageHeight={250} 
-              resizeMode="cover" 
+              url={memes[questionIndex].image}
+              imageWidth={300}
+              imageHeight={250}
               description="Quiz image"
             />
-            <vstack gap="small" width="100%" alignment="center middle">
-              {answers.map((answer, index) => (
+            <vstack gap="small" width="100%">
+              <hstack gap="small" width="100%" alignment="center middle">
                 <button 
-                  key={`${answer}-${index}`} 
-                  appearance="primary" 
-                  onPress={() => handleAnswerClick(answer)}
+                  appearance="primary"
+                  onPress={() => handleAnswerClick(answers[0])}
                   size="small"
-                  width="30%"
+                  width="35%"
                 >
-                  {answer}
+                  {answers[0]}
                 </button>
-              ))}
+                <button 
+                  appearance="primary"
+                  onPress={() => handleAnswerClick(answers[1])}
+                  size="small"
+                  width="35%"
+                >
+                  {answers[1]}
+                </button>
+              </hstack>
+              <hstack gap="small" width="100%" alignment="center middle">
+                <button 
+                  appearance="primary"
+                  onPress={() => handleAnswerClick(answers[2])}
+                  size="small"
+                  width="35%"
+                >
+                  {answers[2]}
+                </button>
+                <button 
+                  appearance="primary"
+                  onPress={() => handleAnswerClick(answers[3])}
+                  size="small"
+                  width="35%"
+                >
+                  {answers[3]}
+                </button>
+              </hstack>
             </vstack>
-          </>
+          </vstack>
         )}
       </vstack>
     );
