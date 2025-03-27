@@ -1,10 +1,6 @@
 # Popular Meme Challenge
 
-**Guess the most popular technically true answer!**
-
-Welcome to **Popular Meme Challenge**, a Reddit game where you vote on the funniest, most absurd, or *technically correct* answers to memes sourced from **r/technicallythetruth**.
-
-Battle of the "Technically True" Answers!
+Welcome to **Popular Meme Challenge**, a Reddit game where you battle for the "Technically True" answers to memes sourced from **r/technicallythetruth**.
 
 Vote for the best answer to hilarious memes - the more players agree with your pick, the higher its votes climb! Only the most popular choice wins, earning you +1 point. Compete for the highest score in real-time against other Redditors! 💪🏻
 
