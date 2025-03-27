@@ -150,15 +150,15 @@ Devvit.addCustomPostType({
               </text>
             </vstack>
             <image 
-              url={memes[0].image}
+              url={"https://preview.redd.it/my-son-is-at-a-firefighting-display-could-you-remove-the-v0-qndetxb6utsb1.jpg?auto=webp&s=d3ce2b6a86cd3fbb56515ace6fcb720aca5aa159"}
               imageWidth={300}
               imageHeight={200}
               description="Meme preview"
             />
-            <text size="large" weight="bold" color="#1A1A1B">
-              Can you guess these meme scenarios?
+            <text size="large" weight="bold" color="#555555">
+              Guess the top-voted answer!
             </text>
-            <button appearance="primary" onPress={startGame} size="small">
+            <button appearance="primary" onPress={startGame} size="large">
               Start Game
             </button>
           </vstack>
@@ -167,14 +167,14 @@ Devvit.addCustomPostType({
             <text size="xxlarge" weight="bold" color="#FF4500">
               Game Over! 🎉
             </text>
-            <text size="xlarge" weight="bold">
+            <text size="xlarge" weight="bold" color="#555555">
               Your Score: {score}/{memes.length}
             </text>
-            <vstack gap="medium" width="80%">
-              <button appearance="primary" onPress={postScoreToComments} size="small">
-                Flex My Score
+            <vstack gap="medium" width="85%">
+              <button appearance="primary" onPress={postScoreToComments} size="large">
+                Flex My Score!
               </button>
-              <button appearance="primary" onPress={startGame} size="small">
+              <button appearance="primary" onPress={startGame} size="large">
                 Play Again
               </button>
             </vstack>
