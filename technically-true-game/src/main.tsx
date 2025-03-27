@@ -1,36 +1,42 @@
-import { Devvit, useState } from "@devvit/public-api";
+import { Devvit } from "@devvit/public-api";
 
 Devvit.configure({
-  redditAPI: true, // Enable Reddit API
+  redditAPI: true,
+  redis: true,
 });
 
-// List of memes with image URLs
-const memes = [
+interface MemeQuestion {
+  question: string;
+  image: string;
+  answers: string[];
+}
+
+const memes: MemeQuestion[] = [
   {
     question: "Rock Paper Scissors. Guess who won?",
-    image: "https://i.redd.it/8csl1hc8udpe1.png", 
-    correct: "Cops beat rockstars 🎸🚓",
-    wrong: [
+    image: "https://i.redd.it/8csl1hc8udpe1.png",
+    answers: [
+      "Cops beat rockstars 🎸🚓",
       "It's a draw 🤷‍♂️",
       "Neighbour wins 😏 🤌 !!! ",
-      "Rock: I'm a rock, I don't care 🪨",
+      "Rock: I'm a rock, I don't care 🪨"
     ],
   },
   {
-    question: "Heart is a heart! (Dog's butt shave)",
+    question: "Heart is a heart!",
     image: "https://i.redd.it/xexx7e24tcqe1.jpeg",
-    correct: "Dog got OnlyFans fame 🍑💕",
-    wrong: [
+    answers: [
+      "Dog got OnlyFans fame 🍑💕",
       "Groomer followed instructions 🐶",
       "He found his missing piece 👉👌",
-      "Get the dog a lawyer!!! 🧑‍⚖️",
+      "Get the dog a lawyer!!! 🧑‍⚖️"
     ],
   },
   {
     question: "Buddha, what makes us human?",
     image: "https://i.redd.it/uv9mongn7qqe1.png", 
-    correct: "Selecting traffic lights 🧑‍💻🚦🚥",
-    wrong: [
+    answers: [ 
+      "Selecting traffic lights 🧑‍💻🚦🚥",
       "But master, they all look right 🤯",
       "Hackers: I write scripts 🤓👨‍💻",
       "Overthinking 🧘‍♂️",
@@ -39,8 +45,8 @@ const memes = [
   {
     question: "500kg iron vs. 500kg feathers",
     image: "https://i.redd.it/mykhhex7vfqe1.jpeg",
-    correct: "Bro I need that tutorial 🏋️‍♂️🙌🏻",
-    wrong: [
+    answers: [ 
+      "Bro I need that tutorial 🏋️‍♂️🙌🏻",
       "Same weight 🤓😎",
       "Bird: 500 kg feathers??? 💀🐦",
       "Don't ask. I don't do gym 🤷‍♂️",
@@ -49,9 +55,9 @@ const memes = [
   {
     question: "What screams 'I'm insecure'?",
     image: "https://i.redd.it/mm9qirb0irqe1.png",
-    correct: "I'm old...💀🪦",
-    wrong: [
-      "Wait, they don\’t all have that? 🤔",
+    answers: [ 
+       "I'm old...💀🪦",
+      "Wait, they don't all have that? 🤔",
       "Neh. My password is password 😎",
       "I'm not insecure, I'm just shy 🥺",
     ],
@@ -60,159 +66,216 @@ const memes = [
 
 Devvit.addCustomPostType({
   name: "Image Quiz Game",
-  height: "tall", // Using tall height to better accommodate images
+  height: "tall",
   render: (context) => {
-    const [score, setScore] = useState(0);
-    const [questionIndex, setQuestionIndex] = useState<number>(0);
-    const [answers, setAnswers] = useState<string[]>([]);
-    const [gameStarted, setGameStarted] = useState(false);
-    const [gameEnded, setGameEnded] = useState(false);
-    const [votes, setVotes] = useState<number[]>([0, 0, 0, 0]); // Track votes for each answer
+    const [score, setScore] = context.useState(0);
+    const [questionIndex, setQuestionIndex] = context.useState(0);
+    const [answers, setAnswers] = context.useState<string[]>([]);
+    const [votes, setVotes] = context.useState<number[]>([0, 0, 0, 0]);
+    const [gameStarted, setGameStarted] = context.useState(false);
+    const [gameEnded, setGameEnded] = context.useState(false);
+    const [hasVoted, setHasVoted] = context.useState(false);
+    const [showResults, setShowResults] = context.useState(false);
+    const [selectedAnswerIndex, setSelectedAnswerIndex] = context.useState<number>(-1);
+    
+    const postId = context.postId;
+    const reddit = context.reddit;
 
-    const postId = context?.postId;
-    const reddit = context?.reddit;
+    const getVotesKey = () => `votes:${postId}:${questionIndex}`;
 
-    // Function to start the game
-    const startGame = () => {
+    const loadVotes = async () => {
+      try {
+        const votesKey = getVotesKey();
+        const storedVotes = await context.redis.get(votesKey);
+        if (storedVotes) {
+          const parsedVotes = JSON.parse(storedVotes);
+          setVotes(parsedVotes);
+          return parsedVotes;
+        } else {
+          const initialVotes = [0, 0, 0, 0];
+          await context.redis.set(votesKey, JSON.stringify(initialVotes));
+          setVotes(initialVotes);
+          return initialVotes;
+        }
+      } catch (error) {
+        console.error("Error loading votes:", error);
+        return [0, 0, 0, 0];
+      }
+    };
+
+    const startGame = async () => {
       setScore(0);
       setGameStarted(true);
       setGameEnded(false);
       setQuestionIndex(0);
-      loadNewQuestion(0);
+      setShowResults(false);
+      setHasVoted(false);
+      setSelectedAnswerIndex(-1);
+      await loadNewQuestion(0);
     };
 
-    // Load a new question
-    const loadNewQuestion = (index: number) => {
+    const loadNewQuestion = async (index: number) => {
       if (index >= memes.length) {
         endGame();
         return;
       }
 
       const selectedQuestion = memes[index];
-      const shuffledAnswers = [...selectedQuestion.wrong, selectedQuestion.correct].sort(() => Math.random() - 0.5);
-
+      const shuffledAnswers = [...selectedQuestion.answers].sort(() => Math.random() - 0.5);
+      
       setQuestionIndex(index);
       setAnswers(shuffledAnswers);
+      setShowResults(false);
+      setHasVoted(false);
+      setSelectedAnswerIndex(-1);
+      await loadVotes();
     };
 
-    // Handle answer selection and voting
-    const handleAnswerClick = (selectedAnswer: string, answerIndex: number) => {
-      if (gameEnded) return;
-
-      // Increment the vote for the selected answer
-      setVotes((prevVotes) => {
-        const newVotes = [...prevVotes];
+    const handleVote = async (answerIndex: number) => {
+      if (hasVoted) return;
+      
+      try {
+        const votesKey = getVotesKey();
+        const currentVotes = await loadVotes();
+        const newVotes = [...currentVotes];
         newVotes[answerIndex] += 1;
-        return newVotes;
-      });
 
-      // Move to next question after voting
-      loadNewQuestion(questionIndex + 1);
+        const txn = await context.redis.watch(votesKey);
+        await txn.multi();
+        await txn.set(votesKey, JSON.stringify(newVotes));
+        const results = await txn.exec();
+        
+        if (results === null) {
+          context.ui.showToast({
+            text: "Vote failed, please try again",
+            appearance: "neutral",
+          });
+          return;
+        }
+        
+        setVotes(newVotes);
+        setSelectedAnswerIndex(answerIndex);
+        setHasVoted(true);
+        setShowResults(true);
+      } catch (error) {
+        console.error("Error handling vote:", error);
+        context.ui.showToast({
+          text: "Failed to register vote",
+          appearance: "neutral",
+        });
+      }
     };
 
-    // End the game
+    const calculateVotePercentage = (index: number): string => {
+      const totalVotes = votes.reduce((sum, count) => sum + count, 0);
+      return totalVotes > 0 ? `${Math.round((votes[index] / totalVotes) * 100)}%` : "0%";
+    };
+
+    const proceedToNextQuestion = async () => {
+      const maxVotes = Math.max(...votes);
+      const winningIndices = votes
+        .map((count, idx) => count === maxVotes ? idx : -1)
+        .filter(idx => idx !== -1);
+
+      if (winningIndices.includes(selectedAnswerIndex)) {
+        setScore(prev => prev + 1);
+      }
+      
+      if (questionIndex >= memes.length - 1) {
+        endGame();
+      } else {
+        await loadNewQuestion(questionIndex + 1);
+      }
+    };
+
     const endGame = () => {
       setGameEnded(true);
+      setShowResults(false);
     };
 
-    // Post the score to the Reddit comments
     const postScoreToComments = async () => {
-      if (!postId || !reddit) {
-        console.error("Error: Missing postId or Reddit API");
-        return;
-      }
+      if (!postId || !reddit) return;
 
-      const commentText = `I finished the Image Quiz Game with ${score} correct answers out of ${memes.length}! 🎉`;
+      const performanceRating = 
+        score === memes.length ? '🏆 Perfect Score!' :
+        score >= Math.ceil(memes.length * 0.75) ? '🎉 Great Job!' :
+        score >= Math.ceil(memes.length * 0.5) ? '👍 Good Try!' :
+        '🤔 Better Luck Next Time!';
 
       try {
         await reddit.submitComment({
           id: postId,
-          text: commentText,
+          text: `I scored ${score}/${memes.length} in the Meme Quiz! ${performanceRating}`,
         });
-        console.log("Score posted successfully!");
+        context.ui.showToast({
+          text: "Score posted successfully!",
+          appearance: "success",
+        });
       } catch (error) {
-        console.error("Error posting score to comments:", error);
+        console.error("Error posting score:", error);
+        context.ui.showToast({
+          text: "Failed to post score",
+          appearance: "neutral",
+        });
       }
     };
 
-    // Function to calculate the vote percentage
-    const calculateVotePercentage = (index: number) => {
-      const totalVotes = votes.reduce((sum, vote) => sum + vote, 0);
-      return totalVotes > 0 ? ((votes[index] / totalVotes) * 100).toFixed(2) : "0.00";
-    };
-
     return (
-      <vstack 
-        height="100%" 
-        width="100%" 
-        gap="medium" 
-        alignment="center middle"
-        padding="medium"
-        backgroundColor="#FFEEF2"
-      >
+      <vstack height="100%" width="100%" gap="medium" alignment="center middle" padding="medium" backgroundColor="#FFEEF2">
         {!gameStarted ? (
           <vstack gap="medium" alignment="center middle">
             <vstack cornerRadius="full" padding="medium" backgroundColor="#FF4500">
-              <text size="xxlarge" weight="bold" color="white">
-                MEME QUIZ CHALLENGE
-              </text>
+              <text size="xxlarge" weight="bold" color="white">MEME QUIZ CHALLENGE</text>
             </vstack>
-            <image 
-              url={"https://preview.redd.it/my-son-is-at-a-firefighting-display-could-you-remove-the-v0-qndetxb6utsb1.jpg?auto=webp&s=d3ce2b6a86cd3fbb56515ace6fcb720aca5aa159"}
-              imageWidth={300}
-              imageHeight={200}
-              description="Meme preview"
-            />
-            <text size="large" weight="bold" color="#555555">
-              Guess the top-voted answer!
-            </text>
-            <button appearance="primary" onPress={startGame} size="large">
+            <image url={memes[0].image} imageWidth={300} imageHeight={200} />
+            <text size="large" color="#000000">Can you guess the most popular answers?</text>
+            <button onPress={startGame} appearance="primary">
               Start Game
             </button>
           </vstack>
         ) : gameEnded ? (
           <vstack gap="medium" alignment="center middle">
-            <text size="xxlarge" weight="bold" color="#FF4500">
-              Game Over! 🎉
-            </text>
-            <text size="xlarge" weight="bold" color="#555555">
-              Your Score: {score}/{memes.length}
-            </text>
-            <vstack gap="medium" width="85%">
-              <button appearance="primary" onPress={postScoreToComments} size="large">
-                Flex My Score!
-              </button>
-              <button appearance="primary" onPress={startGame} size="large">
-                Play Again
-              </button>
+            <text size="xxlarge" weight="bold" color="#FF4500">Game Over! 🎉</text>
+            <text size="xlarge" color="#000000">Your Score: {score}/{memes.length}</text>
+            <button onPress={postScoreToComments} appearance="primary">
+              Share Score
+            </button>
+            <button onPress={startGame} appearance="primary">
+              Play Again
+            </button>
+          </vstack>
+        ) : showResults ? (
+          <vstack gap="medium" width="90%" alignment="center middle">
+            <text size="xlarge" weight="bold" color="#000000">{memes[questionIndex].question}</text>
+            <image url={memes[questionIndex].image} imageWidth={300} imageHeight={250} />
+            <vstack gap="small" width="100%">
+              {answers.map((answer, index) => (
+                <hstack key={index.toString()} gap="medium" alignment="center" width="100%">
+                  <text width="80%" size="medium" color="#000000">{answer}</text>
+                  <text width="20%" size="medium" weight="bold" color="#000000">
+                    {calculateVotePercentage(index)}
+                  </text>
+                </hstack>
+              ))}
             </vstack>
+            <button onPress={proceedToNextQuestion} appearance="primary">
+              Next Question
+            </button>
           </vstack>
         ) : (
           <vstack gap="medium" width="90%" alignment="center middle">
-            <text size="xlarge" weight="bold" color="#1A1A1B">
-              {memes[questionIndex].question}
-            </text>
-            <image 
-              url={memes[questionIndex].image}
-              imageWidth={300}
-              imageHeight={250}
-              description="Quiz image"
-            />
+            <text size="xlarge" weight="bold" color="#000000">{memes[questionIndex].question}</text>
+            <image url={memes[questionIndex].image} imageWidth={300} imageHeight={250} />
             <vstack gap="small" width="100%">
               {answers.map((answer, index) => (
-                <hstack key={index.toString()} gap="small" width="100%" alignment="center middle">
-                  <button 
-                    appearance="primary"
-                    onPress={() => handleAnswerClick(answer, index)}
-                    size="small"
-                    width="35%"
-                  >
-                    {answer}
-                  </button>
-                  <text size="small" color="#555555">
-                    {calculateVotePercentage(index)}% votes
-                  </text>
-                </hstack>
+                <button
+                  key={index.toString()}
+                  onPress={() => handleVote(index)}
+                  appearance="primary"
+                  width="100%"
+                >
+                  {answer}
+                </button>
               ))}
             </vstack>
           </vstack>
