@@ -228,7 +228,7 @@ Devvit.addCustomPostType({
               <text size="xxlarge" weight="bold" color="white">MEME QUIZ CHALLENGE</text>
             </vstack>
             <image url={memes[0].image} imageWidth={300} imageHeight={200} />
-            <text size="large" color="#000000">Can you guess the most popular answers?</text>
+            <text size="large" color="#000000">Guess the most technically true answer!</text>
             <button onPress={startGame} appearance="primary">
               Start Game
             </button>
