@@ -225,7 +225,7 @@ Devvit.addCustomPostType({
         {!gameStarted ? (
           <vstack gap="medium" alignment="center middle">
             <vstack cornerRadius="full" padding="medium" backgroundColor="#FF4500">
-              <text size="xxlarge" weight="bold" color="white">MEME QUIZ CHALLENGE</text>
+              <text size="xxlarge" weight="bold" color="white">POPULAR MEME CHALLENGE</text>
             </vstack>
             <image url={memes[0].image} imageWidth={300} imageHeight={200} />
             <text size="large" color="#000000">Guess the most technically true answer!</text>

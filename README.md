@@ -1,61 +1,25 @@
-# **Meme Quiz Challenge**  
+# Popular Meme Challenge
 
-**Guess the most technically true answer!**  
+Welcome to **Popular Meme Challenge**, a Reddit game where you battle for the "Technically True" answers to memes sourced from **r/technicallythetruth**.
 
-Welcome to **Meme Quiz Challenge**, a Reddit game where you vote on the funniest, most absurd, or *technically correct* answers to meme scenarios sourced from **r/technicallythetruth**.  
+Vote for the best answer to each hilarious memes. Only the most popular choice wins a point. Compete for the highest score in real-time against other Redditors! 💪🏻
 
-### **What is this?**  
-This game presents you with **meme images + questions**, and your goal is to pick the answer that best fits the *technically true* (or funniest) interpretation.  
+## How It Works
 
-For example:  
+1. **Start**: Get a meme + question
+2. **Vote**: Pick the funniest/most popular answer
+3. **Score**: If your answer was the most popular, you get +1 point!
+4. **Share**: Post your final score (e.g., "I scored 4/5! 🎉")
 
-**Question:** *"Rock Paper Scissors. Guess who won?"*  
-**Answers:**  
-- "Cops beat rockstars 🎸🚓"  
-- "It's a draw 🤷‍♂️"  
-- "Neighbour wins 😏 🤌 !!!"  
-- "Rock: I'm a rock, I don't care 🪨"  
+## Why Play?
 
-The most popular answer wins, and you score points if you picked it!  
+- 🤣 Memes from r/technicallythetruth
+- 🏆 Compete for the highest score
+- 🔥 Real-time voting with other Redditors
 
----
+## Built With
 
-### **How to Play**  
+| Devvit | Redis | TypeScript | React
 
-#### **Playing the Game**  
-1. **Start the Quiz** – Click **"Start Game"** to begin.  
-2. **View the Meme** – Each round shows a meme + a question.  
-3. **Vote for the Best Answer** – Pick the funniest or most *technically correct* option.  
-4. **See Results** – After voting, view how others voted.  
-5. **Score Points** – If your answer was the most popular, you get +1 point!  
-6. **Finish & Share** – After 5 memes, see your final score and post it to Reddit!  
-
-#### **Scoring System**  
-- **🏆 Perfect Score (5/5)** – You’re a meme genius!  
-- **🎉 Great Job (4/5)** – Almost perfect!  
-- **👍 Good Try (3/5)** – Not bad!  
-- **🤔 Better Luck Next Time (≤2/5)** – Keep practicing!  
-
----
-
-### **Built With**  
-- **Devvit** (Reddit app framework)  
-- **TypeScript**  
-- **Redis** (for vote storage)  
-- **React-like UI** (via Devvit components)  
-
----
-
-### **Try It Out**  
-Play now in the **Reddit app** by looking for **"Meme Quiz Challenge"** posts!  
-
-**Example subreddit:** [r/technicallythetruth](https://www.reddit.com/r/technicallythetruth/)  
-
----
-
-### **Why Play?**   
-✅ Test your *technically correct* thinking  
-✅ Compete with other Redditors  
-✅ Share your score and brag (or cry) in the comments  
-
-**Ready to prove your meme IQ?** Start playing now! 🚀# reddit-hackathon-2025
+Start playing now! 🚀  
+https://www.reddit.com/r/technicallyMemegame/
