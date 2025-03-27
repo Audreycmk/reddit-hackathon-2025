@@ -88,8 +88,9 @@ Devvit.addCustomPostType({
         const votesKey = getVotesKey();
         const storedVotes = await context.redis.get(votesKey);
         if (storedVotes) {
-          setVotes(JSON.parse(storedVotes));
-          return JSON.parse(storedVotes);
+          const parsedVotes = JSON.parse(storedVotes);
+          setVotes(parsedVotes);
+          return parsedVotes;
         } else {
           const initialVotes = [0, 0, 0, 0];
           await context.redis.set(votesKey, JSON.stringify(initialVotes));
@@ -165,33 +166,46 @@ Devvit.addCustomPostType({
       }
     };
 
+    const calculateVotePercentage = (index: number): string => {
+      const totalVotes = votes.reduce((sum, count) => sum + count, 0);
+      return totalVotes > 0 ? `${Math.round((votes[index] / totalVotes) * 100)}%` : "0%";
+    };
+
     const proceedToNextQuestion = async () => {
       const maxVotes = Math.max(...votes);
-      const isCorrect = selectedAnswerIndex !== -1 && votes[selectedAnswerIndex] === maxVotes;
-      
-      if (isCorrect) {
+      const winningIndices = votes
+        .map((count, idx) => count === maxVotes ? idx : -1)
+        .filter(idx => idx !== -1);
+
+      if (winningIndices.includes(selectedAnswerIndex)) {
         setScore(prev => prev + 1);
       }
       
-      await loadNewQuestion(questionIndex + 1);
+      if (questionIndex >= memes.length - 1) {
+        endGame();
+      } else {
+        await loadNewQuestion(questionIndex + 1);
+      }
     };
 
     const endGame = () => {
       setGameEnded(true);
-    };
-
-    const calculateVotePercentage = (index: number): string => {
-      const totalVotes = votes.reduce((a, b) => a + b, 0);
-      return totalVotes > 0 ? `${Math.round((votes[index] / totalVotes) * 100)}%` : "0%";
+      setShowResults(false);
     };
 
     const postScoreToComments = async () => {
       if (!postId || !reddit) return;
 
+      const performanceRating = 
+        score === memes.length ? '🏆 Perfect Score!' :
+        score >= Math.ceil(memes.length * 0.75) ? '🎉 Great Job!' :
+        score >= Math.ceil(memes.length * 0.5) ? '👍 Good Try!' :
+        '🤔 Better Luck Next Time!';
+
       try {
         await reddit.submitComment({
           id: postId,
-          text: `I scored ${score}/${memes.length} in the Meme Quiz! ${score === memes.length ? '🏆' : '🎉'}`,
+          text: `I scored ${score}/${memes.length} in the Meme Quiz! ${performanceRating}`,
         });
         context.ui.showToast({
           text: "Score posted successfully!",
