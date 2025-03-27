@@ -58,7 +58,6 @@ const memes = [
   }
 ];
 
-
 Devvit.addCustomPostType({
   name: "Image Quiz Game",
   height: "tall", // Using tall height to better accommodate images
@@ -68,6 +67,7 @@ Devvit.addCustomPostType({
     const [answers, setAnswers] = useState<string[]>([]);
     const [gameStarted, setGameStarted] = useState(false);
     const [gameEnded, setGameEnded] = useState(false);
+    const [votes, setVotes] = useState<number[]>([0, 0, 0, 0]); // Track votes for each answer
 
     const postId = context?.postId;
     const reddit = context?.reddit;
@@ -95,16 +95,18 @@ Devvit.addCustomPostType({
       setAnswers(shuffledAnswers);
     };
 
-    // Handle answer selection
-    const handleAnswerClick = (selectedAnswer: string) => {
+    // Handle answer selection and voting
+    const handleAnswerClick = (selectedAnswer: string, answerIndex: number) => {
       if (gameEnded) return;
 
-      const correctAnswer = memes[questionIndex].correct;
+      // Increment the vote for the selected answer
+      setVotes((prevVotes) => {
+        const newVotes = [...prevVotes];
+        newVotes[answerIndex] += 1;
+        return newVotes;
+      });
 
-      if (selectedAnswer === correctAnswer) {
-        setScore((prevScore) => prevScore + 1);
-      }
-
+      // Move to next question after voting
       loadNewQuestion(questionIndex + 1);
     };
 
@@ -131,6 +133,12 @@ Devvit.addCustomPostType({
       } catch (error) {
         console.error("Error posting score to comments:", error);
       }
+    };
+
+    // Function to calculate the vote percentage
+    const calculateVotePercentage = (index: number) => {
+      const totalVotes = votes.reduce((sum, vote) => sum + vote, 0);
+      return totalVotes > 0 ? ((votes[index] / totalVotes) * 100).toFixed(2) : "0.00";
     };
 
     return (
@@ -191,42 +199,21 @@ Devvit.addCustomPostType({
               description="Quiz image"
             />
             <vstack gap="small" width="100%">
-              <hstack gap="small" width="100%" alignment="center middle">
-                <button 
-                  appearance="primary"
-                  onPress={() => handleAnswerClick(answers[0])}
-                  size="small"
-                  width="35%"
-                >
-                  {answers[0]}
-                </button>
-                <button 
-                  appearance="primary"
-                  onPress={() => handleAnswerClick(answers[1])}
-                  size="small"
-                  width="35%"
-                >
-                  {answers[1]}
-                </button>
-              </hstack>
-              <hstack gap="small" width="100%" alignment="center middle">
-                <button 
-                  appearance="primary"
-                  onPress={() => handleAnswerClick(answers[2])}
-                  size="small"
-                  width="35%"
-                >
-                  {answers[2]}
-                </button>
-                <button 
-                  appearance="primary"
-                  onPress={() => handleAnswerClick(answers[3])}
-                  size="small"
-                  width="35%"
-                >
-                  {answers[3]}
-                </button>
-              </hstack>
+              {answers.map((answer, index) => (
+                <hstack key={index.toString()} gap="small" width="100%" alignment="center middle">
+                  <button 
+                    appearance="primary"
+                    onPress={() => handleAnswerClick(answer, index)}
+                    size="small"
+                    width="35%"
+                  >
+                    {answer}
+                  </button>
+                  <text size="small" color="#555555">
+                    {calculateVotePercentage(index)}% votes
+                  </text>
+                </hstack>
+              ))}
             </vstack>
           </vstack>
         )}
